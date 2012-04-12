@@ -19,6 +19,7 @@
 
 build_dir = "#{Chef::Config[:file_cache_path]}/mosh-source"
 version = node['mosh']['version']
+tarball_file = "#{Chef::Config[:file_cache_path]}/mosh-#{version}.tar.gz"
 
 bash "build-mosh" do
   cwd Chef::Config[:file_cache_path]
@@ -28,10 +29,10 @@ bash "build-mosh" do
   (cd mosh-#{version} && make)
   (cd mosh-#{version} && make install)
   EOH
-  action :nothing
+  only_if { ::File.exists? tarball_file }
 end
 
-remote_file "#{Chef::Config[:file_cache_path]}/mosh-#{version}.tar.gz" do
+remote_file tarball_file do
   source node['mosh']['source_url']
   checksum node['mosh']['source_checksum']
   notifies :run, resources("bash[build-mosh]"), :immediately
