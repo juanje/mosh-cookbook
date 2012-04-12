@@ -21,6 +21,10 @@ build_dir = "#{Chef::Config[:file_cache_path]}/mosh-source"
 version = node['mosh']['version']
 tarball_file = "#{Chef::Config[:file_cache_path]}/mosh-#{version}.tar.gz"
 
+node['mosh']['dependencies'].each do |pkg|
+  package pkg
+end
+
 bash "build-mosh" do
   cwd Chef::Config[:file_cache_path]
   code <<-EOH
