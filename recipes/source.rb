@@ -20,18 +20,19 @@
 build_dir = "#{Chef::Config[:file_cache_path]}/mosh-source"
 version = node['mosh']['version']
 
+bash "build-mosh" do
+  cwd Chef::Config[:file_cache_path]
+  code <<-EOH
+  tar -zxvf mosh-#{version}.tar.gz
+  (cd mosh-#{version} && ./configure #{node['mosh']['configure_flags'].join(' ')})
+  (cd mosh-#{version} && make)
+  (cd mosh-#{version} && make install)
+  EOH
+  action :nothing
+end
+
 remote_file "#{Chef::Config[:file_cache_path]}/mosh-#{version}.tar.gz" do
   source node['mosh']['source_url']
   checksum node['mosh']['source_checksum']
   notifies :run, resources("bash[build-mosh]"), :immediately
-end
-
-bash "build-mosh" do
-  cwd Chef::Config[:file_cache_path]
-  code <<-EOH
-tar -zxvf mosh-#{version}.tar.gz
-(cd mosh-#{version} && ./configure #{node['mosh']['configure_flags'].join(' ')})
-(cd mosh-#{version} && make)
-(cd mosh-#{version} && make install)
-EOH
 end
